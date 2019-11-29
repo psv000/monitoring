@@ -1,0 +1,51 @@
+version: '3'
+
+networks:
+  monitor-net:
+    driver: bridge
+
+volumes:
+  prometheus_data: {}
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./env/prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention=200h'
+      - '--web.enable-lifecycle'
+    # restart: unless-stopped
+    expose:
+      - 9090
+    ports:
+      - "9090:9090"
+    networks:
+      - monitor-net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    volumes:
+      - ./env/grafana/datasources:/etc/grafana/datasources
+      - ./env/grafana/grafana.db:/var/lib/grafana/grafana.db
+      - ./env/grafana/setup.sh:/setup.sh
+    entrypoint: /setup.sh
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=vonage-status-panel
+    restart: unless-stopped
+    expose:
+      - 3000
+    ports:
+      - 3000:3000
+    networks:
+      - monitor-net

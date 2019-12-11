@@ -1,0 +1,11 @@
+global:
+  slack_api_url: 'https://api.slack.com/apps/AR7FG30DR'
+route:
+  receiver: 'slack'
+receivers:
+  - name: 'slack'
+    slack_configs:
+      - send_resolved: true
+        username: 'alien'
+        channel: 'this-that'
+        api_url: 'https://hooks.slack.com/services/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'

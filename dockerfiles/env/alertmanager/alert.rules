@@ -1,0 +1,11 @@
+groups:
+- name: fx-quotes.rules
+  rules:
+  - alert: FxQuotesServiceInTotalSlavery
+    expr: increase(fx_quotes_db_write_quotes[1m]) == 0 and increase(fx_quotes_db_write_candles[1m]) == 0
+    for: 1m
+    labels:
+      severity: slack_backnotify
+    annotations:
+      description: '{{ $labels.job }} fx quotes are not written to db {{ $labels.instance }}'
+      summary: '{{ $labels.job }} fx quotes service in total slavery'
